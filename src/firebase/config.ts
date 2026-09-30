@@ -23,6 +23,7 @@ import {
   getDoc,
   serverTimestamp 
 } from 'firebase/firestore';
+import { submitWaitlistToSupabase } from '../lib/supabase';
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
@@ -98,6 +99,12 @@ export async function submitWaitlistEntry(data: {
   preferredLanguage?: string;
 }) {
   const path = 'waitlist';
+  
+  // Concurrently sync to Supabase database
+  submitWaitlistToSupabase(data).catch((err) => {
+    console.warn('Supabase waitlist sync deferred error:', err);
+  });
+
   try {
     const docRef = await addDoc(collection(db, path), {
       email: data.email.trim().toLowerCase(),
