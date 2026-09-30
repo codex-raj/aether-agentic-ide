@@ -1,0 +1,6 @@
+{
+  "name": "Aether IDE - Autonomous AI Code Editor & Platform",
+  "description": "Aether Product Platform: Autonomous AI Code Editor with Studio Mode, Multi-Model Gateway, and Secure Device Management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

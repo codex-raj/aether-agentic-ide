@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "gen-lang-client-0024641983"
+  },
+  "targets": {
+    "gen-lang-client-0024641983": {
+      "hosting": {
+        "aether-ai-ide": [
+          "aether-ai-ide"
+        ]
+      }
+    }
+  }
+}

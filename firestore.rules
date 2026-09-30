@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "Rajsinha7462@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Waitlist collection: developers can join waitlist with validation
+    match /waitlist/{waitlistId} {
+      allow create: if isValidId(waitlistId)
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.createdAt is string
+        && (!('fullName' in request.resource.data) || (request.resource.data.fullName is string && request.resource.data.fullName.size() <= 100))
+        && (!('role' in request.resource.data) || (request.resource.data.role is string && request.resource.data.role.size() <= 100))
+        && (!('preferredLanguage' in request.resource.data) || (request.resource.data.preferredLanguage is string && request.resource.data.preferredLanguage.size() <= 50));
+      
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 200;
+
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+  }
+}
